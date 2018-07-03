@@ -3001,6 +3001,76 @@ class HTMLStyleElement extends HTMLLoadableElement {
     return running;
   }
 }
+class HTMLLinkElement extends HTMLLoadableElement {
+  constructor(attrs = [], value = '', location = null) {
+    super('LINK', attrs, value, location);
+
+    this.stylesheet = null;
+
+    this.on('attribute', (name, value) => {
+      if (name === 'href' && this.isRunnable()) {
+        const url = value;
+        this.ownerDocument.defaultView.fetch(url)
+          .then(res => {
+            if (res.status >= 200 && res.status < 300) {
+              return res.text();
+            } else {
+              return Promise.reject(new Error('link href got invalid status code: ' + res.status + ' : ' + url));
+            }
+          })
+          .then(s => css.parse(s).stylesheet)
+          .then(stylesheet => {
+            this.stylesheet = stylesheet;
+            styleEpoch++;
+            this.dispatchEvent(new Event('load', {target: this}));
+          })
+          .catch(err => {
+            this.dispatchEvent(new Event('error', {target: this}));
+          });
+      }
+    });
+  }
+
+  get rel() {
+    return this.getAttribute('rel') || '';
+  }
+  set rel(rel) {
+    rel = href + '';
+    this.setAttribute('rel', rel);
+  }
+
+  get href() {
+    return this.getAttribute('href') || '';
+  }
+  set href(href) {
+    href = href + '';
+    this.setAttribute('href', href);
+  }
+
+  get type() {
+    type = type + '';
+    return this.getAttribute('type') || '';
+  }
+  set type(type) {
+    this.setAttribute('type', type);
+  }
+
+  isRunnable() {
+    return this.rel === 'stylesheet';
+  }
+
+  run() {
+    let running = false;
+    if (this.isRunnable()) {
+      const hrefAttr = this.attributes.href;
+      if (hrefAttr) {
+        this._emit('attribute', 'href', hrefAttr.value);
+        running = true;
+      }
+    }
+    return running;
+  }
+}
 class HTMLScriptElement extends HTMLLoadableElement {
   constructor(attrs = [], value = '', location = null) {
     super('SCRIPT', attrs, value, location);
@@ -3853,6 +3923,24 @@ const _runHtml = (element, window) => {
               });
           }
         }
+      } else if (el instanceof window.HTMLLinkElement) {
+        if (el.run()) {
+          if (el.childNodes.length > 0) {
+            try {
+              await _loadPromise(el)
+                .catch(err => {
+                  console.warn(err);
+                });
+            } catch(err) {
+              console.warn(err);
+            }
+          } else {
+            _loadPromise(el)
+              .catch(err => {
+                console.warn(err);
+              });
+          }
+        }
       } else if (el instanceof window.HTMLScriptElement) {
         if (el.run()) {
           const asyncAttr = el.attributes.async;
@@ -4241,6 +4329,7 @@ const _makeWindow = (options = {}, parent = null, top = null) => {
     BODY: HTMLBodyElement,
     A: HTMLAnchorElement,
     STYLE: HTMLStyleElement,
+    LINK: HTMLLinkElement,
     SCRIPT: HTMLScriptElement,
     IMG: HTMLImageElementBound,
     AUDIO: HTMLAudioElementBound,
@@ -4256,6 +4345,7 @@ const _makeWindow = (options = {}, parent = null, top = null) => {
   window.HTMLElement = HTMLElement;
   window.HTMLAnchorElement = HTMLAnchorElement;
   window.HTMLStyleElement = HTMLStyleElement;
+  window.HTMLLinkElement = HTMLLinkElement;
   window.HTMLScriptElement = HTMLScriptElement;
   window.HTMLImageElement = HTMLImageElementBound,
   window.HTMLAudioElement = HTMLAudioElementBound;
@@ -4277,9 +4367,10 @@ const _makeWindow = (options = {}, parent = null, top = null) => {
     let styleSpec = el[computedStyleSymbol];
     if (!styleSpec || styleSpec.epoch !== styleEpoch) {
       const style = el.style.clone();
-      const styleEls = el.ownerDocument.documentElement.getElementsByTagName('style');
-      for (let i = 0; i < styleEls.length; i++) {
-        const {stylesheet} = styleEls[i];
+      const stylesheetEls = el.ownerDocument.documentElement.getElementsByTagName('style')
+        .concat(el.ownerDocument.documentElement.getElementsByTagName('link'));
+      for (let i = 0; i < stylesheetEls.length; i++) {
+        const {stylesheet} = stylesheetEls[i];
         if (stylesheet) {
           const {rules} = stylesheet;
           for (let j = 0; j < rules.length; j++) {
