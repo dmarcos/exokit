@@ -10,15 +10,22 @@
 
 NAN_METHOD(Oculus_Init)
 {
-  
+  bool returnValue;
   ovrSession session;
   ovrGraphicsLuid luid;
   ovrResult result = ovr_Create(&session, &luid);
-
+  
   ovrInitParams initParams = { ovrInit_RequestVersion | ovrInit_FocusAware, OVR_MINOR_VERSION, NULL, 0, 0 };
   result = ovr_Initialize(&initParams);
+  
+  ovrHmdDesc desc = ovr_GetHmdDesc(session);
+  if (desc.Type == ovrHmd_None) { 
+    returnValue = false;
+  } else {
+    returnValue = true;
+  }
 
-  return;
+  info.GetReturnValue().Set(Nan::New<Boolean>(returnValue));
 }
 
 Local<Object> makeOculusVr() {

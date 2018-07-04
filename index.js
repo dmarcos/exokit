@@ -24,8 +24,6 @@ const {THREE} = core;
 const nativeBindings = require(nativeBindingsModulePath);
 const {nativeVideo, nativeVr, oculusVr, nativeLm, nativeMl, nativeWindow} = nativeBindings;
 
-oculusVr.Oculus_Init();
-
 const dataPath = path.join(os.homedir() || __dirname, '.exokit');
 
 const contexts = [];
@@ -358,6 +356,19 @@ nativeVr.exitPresent = function() {
 
   return Promise.resolve();
 };
+
+// Oculus initialization 
+
+let isOculusConnected = oculusVr.Oculus_Init();
+
+// Replace nativeVR with Oculus implementation.
+if (isOculusConnected) {
+
+
+
+}
+
+
 let mlContext = null;
 let isMlPresenting = false;
 let mlFbo = null;
