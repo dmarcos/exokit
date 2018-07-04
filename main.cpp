@@ -10,6 +10,7 @@
 #include <bindings.h>
 #include <glfw.h>
 #include <openvr-bindings.h>
+#include <oculus-bindings.h>
 
 using namespace v8;
 
@@ -178,6 +179,9 @@ void InitExports(Handle<Object> exports) {
 
   Local<Value> vr = makeVr();
   exports->Set(v8::String::NewFromUtf8(Isolate::GetCurrent(), "nativeVr"), vr);
+
+  Local<Value> oculusVR = makeOculusVr();
+  exports->Set(v8::String::NewFromUtf8(Isolate::GetCurrent(), "oculusVr"), oculusVR);
 
 #if _WIN32
   Local<Value> lm = makeLm();

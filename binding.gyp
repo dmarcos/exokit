@@ -18,6 +18,7 @@
             'deps/exokit-bindings/videocontext/src/win/*.cpp',
             'deps/exokit-bindings/glfw/src/*.cc',
             'deps/openvr/src/*.cpp',
+            'deps/oculus/src/*.cpp',
             'deps/exokit-bindings/leapmotion/src/*.cc',
           ],
           'include_dirs': [
@@ -28,7 +29,8 @@
             "<!(node -e \"console.log(require.resolve('native-canvas-deps').slice(0, -9) + '/include/effects')\")",
             "<!(node -e \"console.log(require.resolve('native-audio-deps').slice(0, -9) + '/include')\")",
             "<!(node -e \"console.log(require.resolve('native-video-deps').slice(0, -9) + '/include')\")",
-            "<!(node -e \"console.log(require.resolve('native-openvr-deps').slice(0, -9) + '/headers')\")",
+            "<!(node -e \"console.log(require.resolve('native-oculus-deps').slice(0, -9) + '/headers')\")",
+            "<!(node -e \"console.log(require.resolve('native-openvr-deps').slice(0, -9) + '/Include')\")",
             "<!(node -e \"console.log(require.resolve('leapmotion').slice(0, -9) + '/include')\")",
             '<(module_root_dir)/deps/exokit-bindings',
             '<(module_root_dir)/deps/exokit-bindings/utf8',
@@ -44,6 +46,7 @@
             '<(module_root_dir)/deps/exokit-bindings/videocontext/include',
             '<(module_root_dir)/deps/exokit-bindings/glfw/include',
             '<(module_root_dir)/deps/openvr/include',
+            '<(module_root_dir)/deps/oculus/include',
             '<(module_root_dir)/deps/exokit-bindings/leapmotion/include',
           ],
           'library_dirs': [
