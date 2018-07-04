@@ -10,17 +10,13 @@
 
 NAN_METHOD(Oculus_Init)
 {
-  if (info.Length() != 1)
-  {
-    Nan::ThrowError("Wrong number of arguments.");
-    return;
-  }
+  
+  ovrSession session;
+  ovrGraphicsLuid luid;
+  ovrResult result = ovr_Create(&session, &luid);
 
-  if (!info[0]->IsNumber())
-  {
-    Nan::ThrowTypeError("Argument[0] must be a number (EVRApplicationType).");
-    return;
-  }
+  ovrInitParams initParams = { ovrInit_RequestVersion | ovrInit_FocusAware, OVR_MINOR_VERSION, NULL, 0, 0 };
+  result = ovr_Initialize(&initParams);
 
   return;
 }

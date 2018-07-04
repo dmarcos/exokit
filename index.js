@@ -22,7 +22,9 @@ const {version} = require('./package.json');
 const nativeBindingsModulePath = path.join(__dirname, 'native-bindings.js');
 const {THREE} = core;
 const nativeBindings = require(nativeBindingsModulePath);
-const {nativeVideo, nativeVr, nativeLm, nativeMl, nativeWindow} = nativeBindings;
+const {nativeVideo, nativeVr, oculusVr, nativeLm, nativeMl, nativeWindow} = nativeBindings;
+
+oculusVr.Oculus_Init();
 
 const dataPath = path.join(os.homedir() || __dirname, '.exokit');
 
