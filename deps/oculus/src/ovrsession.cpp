@@ -1,6 +1,7 @@
-#include <stdlib.h>
+#include <glfw/include/glfw.h>
 #include <ovrsession.h>
 #include <node.h>
+#include <stdlib.h>
 #include <v8.h>
 #include <webgl.h>
 
@@ -63,6 +64,16 @@ NAN_METHOD(OVRSession::New)
 
 NAN_METHOD(OVRSession::SetupSwapChain)
 {
+
+  GLFWmonitor *primary = glfwGetPrimaryMonitor();
+  NATIVEwindow * window = glfw::GetCurrentWindowContext();
+  int windowWidth;
+  int windowHeight;
+  int monitorCount;
+  GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+  glfw::GetWindowSize(window, &windowWidth, &windowHeight);
+  glfwSetWindowMonitor(window, primary, 0, 0, windowHeight, windowWidth, 0);
+
   OVRSession* session = ObjectWrap::Unwrap<OVRSession>(info.Holder());
   // Configure Stereo settings.
   ovrHmdDesc hmdDesc = ovr_GetHmdDesc(*session->self_);

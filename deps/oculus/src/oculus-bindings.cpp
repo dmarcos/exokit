@@ -18,10 +18,12 @@ NAN_METHOD(Oculus_Init)
     return;
   }
 
-  ovrSession * session = (ovrSession *) malloc(sizeof(ovrSession));
   ovrResult result = ovr_Initialize(nullptr);
-  if (OVR_FAILURE(result)) { return; }
+  if (OVR_FAILURE(result)) {
+    return;
+  }
 
+  ovrSession *session = (ovrSession *) malloc(sizeof(ovrSession));
   ovrGraphicsLuid luid;
   result = ovr_Create(session, &luid);
   if (OVR_FAILURE(result))
@@ -41,10 +43,10 @@ NAN_METHOD(Oculus_IsHmdPresent)
 {
   bool returnValue;
 
-  ovrSession session;
   ovrResult result = ovr_Initialize(nullptr);
   if (OVR_FAILURE(result)) { return; }
 
+  ovrSession session;
   ovrGraphicsLuid luid;
   result = ovr_Create(&session, &luid);
   if (OVR_FAILURE(result))

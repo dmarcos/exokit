@@ -6,6 +6,10 @@
 #include <thread>
 #include <functional>
 
+#include <iostream>
+#include "OVR_CAPI_GL.h"
+#include <glfw/include/glfw.h>
+
 #include <v8.h>
 #include <bindings.h>
 
@@ -226,6 +230,61 @@ void InitExports(Handle<Object> exports) {
 }
 
 void Init(Handle<Object> exports) {
+  ovrSession session;
+  ovrHmdDesc hmdDesc;
+
+  // **********************
+  ovrResult result = ovr_Initialize(nullptr);
+  if (OVR_FAILURE(result)) {
+  }
+
+  ovrGraphicsLuid luid;
+  result = ovr_Create(&session, &luid);
+  if (OVR_FAILURE(result))
+  {
+    ovr_Shutdown();
+  }
+
+  ovr_SetTrackingOriginType(session, ovrTrackingOrigin_EyeLevel);
+  hmdDesc = ovr_GetHmdDesc(session);
+  if (hmdDesc.Type != ovrHmd_None) { std::cout << "HEADSET CONNECTED" << std::endl; }
+
+  // Configure Stereo settings.
+  ovrSizei recommenedTex0Size = ovr_GetFovTextureSize(session, ovrEye_Left, hmdDesc.DefaultEyeFov[ovrEye_Left], 1);
+  ovrSizei recommenedTex1Size = ovr_GetFovTextureSize(session, ovrEye_Right, hmdDesc.DefaultEyeFov[ovrEye_Right], 1);
+  ovrSizei bufferSize;
+  bufferSize.w  = recommenedTex0Size.w + recommenedTex1Size.w;
+  bufferSize.h = std::max(recommenedTex0Size.h, recommenedTex1Size.h);
+
+  ovrTextureSwapChain textureSwapChain;
+
+  ovrTextureSwapChainDesc desc = {};
+  desc.Type = ovrTexture_2D;
+  desc.ArraySize = 1;
+  desc.Format = OVR_FORMAT_R8G8B8A8_UNORM_SRGB;
+  desc.Width = bufferSize.w;
+  desc.Height = bufferSize.h;
+  desc.MipLevels = 1;
+  desc.SampleCount = 1;
+  desc.StaticImage = ovrFalse;
+
+  if (glfwInit()) { std::cout << "SUCCESS GLFW" << std::endl; }
+  int count;
+  GLFWmonitor** monitors = glfwGetMonitors(&count);
+  std::cout << "MONITORS " << count << std::endl;
+  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+  GLFWwindow* window = glfwCreateWindow(640, 480, "My Title", NULL, NULL);
+  if (window) { std::cout << "SUCCESS WINDOW" << std::endl; }
+  glfwMakeContextCurrent(window);
+  if (0 != glewInit()) {
+    std::cout << "EXTENSIONS " << result << std::endl;
+  }
+  result = ovr_CreateTextureSwapChainGL(session, &desc, &textureSwapChain);
+  if (!OVR_SUCCESS(result)) {
+    std::cout << "SWAP CHAIN ERROR " << result << std::endl;
+  }
+
+  // **********************
   InitExports(exports);
 }
 
